@@ -1,0 +1,17 @@
+{
+  "name": "MMV Produção — Controle de Equipamentos",
+  "short_name": "MMV Produção",
+  "description": "Controle de equipamentos audiovisuais do Ministério Mudança de Vida",
+  "start_url": "/painel",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f1f4f8",
+  "theme_color": "#0f2a5c",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

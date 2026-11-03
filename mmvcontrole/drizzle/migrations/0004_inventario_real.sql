@@ -1,0 +1,150 @@
+DELETE FROM public.inspections;
+DELETE FROM public.return_items;
+DELETE FROM public.returns;
+DELETE FROM public.checkout_items;
+DELETE FROM public.checkouts;
+DELETE FROM public.reservations;
+DELETE FROM public.maintenance_expenses;
+DELETE FROM public.maintenance_orders;
+DELETE FROM public.technical_assistance;
+DELETE FROM public.cleaning_orders;
+DELETE FROM public.movements;
+DELETE FROM public.notifications;
+DELETE FROM public.audit_logs;
+DELETE FROM public.kit_items;
+DELETE FROM public.kits;
+DELETE FROM public.equipment_accessories;
+DELETE FROM public.equipment_photos;
+DELETE FROM public.equipment_documents;
+DELETE FROM public.equipment;
+
+INSERT INTO public.locations (unit_id, nome, descricao)
+SELECT '11111111-1111-1111-1111-111111111111', v.nome, v.descricao
+FROM (VALUES
+  ('Transmissão', 'Estrutura de transmissão ao vivo'),
+  ('Estúdio de gravação', 'Estúdio de gravação'),
+  ('House', 'House mix, luz e telões'),
+  ('Fotografia', 'Equipe de fotografia'),
+  ('Eventos', 'Equipamentos de eventos'),
+  ('Trabalhos externos', 'Gravações e trabalhos fora da unidade'),
+  ('Sala do VS', 'Sala do VS')
+) AS v(nome, descricao)
+WHERE NOT EXISTS (SELECT 1 FROM public.locations l WHERE l.nome = v.nome);
+
+INSERT INTO public.equipment (nome, quantidade, category_id, unit_id, location_id, status, estado_conservacao, observacoes)
+SELECT v.nome, v.qtd,
+       (SELECT id FROM public.equipment_categories WHERE nome = v.categoria),
+       '11111111-1111-1111-1111-111111111111',
+       (SELECT id FROM public.locations WHERE nome = v.local LIMIT 1),
+       v.status, v.conservacao, v.obs
+FROM (VALUES
+  ('ATEM Constellation 8K – Switcher',1,'Mesas de corte','Transmissão','em_uso','bom',NULL),
+  ('ATEM Constellation – Slide – Switcher',1,'Mesas de corte','Transmissão','em_uso','bom',NULL),
+  ('ATEM Constellation – Slide – Switcher (backup)',1,'Mesas de corte','Transmissão','aguardando_liberacao','bom','Precisa instalar'),
+  ('Videohub 40/40 – Distribuição e roteamento',1,'Conversores','Transmissão','aguardando_liberacao','bom','Precisa instalar'),
+  ('HyperDeck 4K Pro – Live',1,'Gravadores','Transmissão','em_uso','bom',NULL),
+  ('HyperDeck 4K Pro – Gravação',3,'Gravadores','Estúdio de gravação','em_uso','bom',NULL),
+  ('ATEM SDI Extreme ISO 8 Inputs – backup de gravação',1,'Mesas de corte','Estúdio de gravação','aguardando_liberacao','bom','Não está instalado no estúdio'),
+  ('ATEM Television Studio Pro 4K',1,'Mesas de corte','Estúdio de gravação','em_uso','bom',NULL),
+  ('ATEM Mini Pro HDMI 4 Inputs – Switcher',1,'Mesas de corte','Transmissão','aguardando_liberacao','bom','Não está instalado'),
+  ('NeoiD Estúdio 6 + monitor – switcher portátil',1,'Mesas de corte','Transmissão','em_uso','bom','Usado nos trabalhos necessários'),
+  ('Blackmagic ATEM Camera Control Panel',1,'Acessórios','Transmissão','em_uso','bom',NULL),
+  ('ATEM 2 M/E Advanced Panel 20 – mesa de corte',1,'Mesas de corte','Transmissão','em_uso','bom',NULL),
+  ('Câmera Blackmagic Pocket 6K Pro',1,'Câmeras','Transmissão','em_uso','bom',NULL),
+  ('Câmera Blackmagic Pocket 6K Pro (no conserto)',1,'Câmeras','Transmissão','enviado_assistencia','ruim','Está no conserto'),
+  ('Câmera Blackmagic Estúdio 4K Pro – Transmissão',4,'Câmeras','Transmissão','em_uso','bom','4 na nave'),
+  ('Câmera Blackmagic Estúdio 4K Pro – câmera fixa no chão (no conserto)',1,'Câmeras','Transmissão','enviado_assistencia','ruim','Está no conserto'),
+  ('Câmera Blackmagic Estúdio 4K Pro – Estúdio de gravação',4,'Câmeras','Estúdio de gravação','em_uso','bom',NULL),
+  ('Câmera NeoiD PTZ',2,'Câmeras','Transmissão','em_uso','bom','Câmeras do teclado e da bateria'),
+  ('Câmera NeoiD PTZ (quebrada)',1,'Câmeras','Transmissão','quebrado','ruim','Está quebrada'),
+  ('NeoiD PTZ Controller',1,'Acessórios','Transmissão','aguardando_liberacao','bom','Precisa configurar IP e passar cabos de rede para controlar as câmeras da bateria e do teclado'),
+  ('DJI RS2 Gimbal Stabilizer',1,'Suportes','Transmissão','em_uso','bom',NULL),
+  ('DJI RS2 Gimbal Stabilizer (na revisão)',1,'Suportes','Transmissão','precisa_revisao','regular','Está na revisão'),
+  ('Zhiyun Crane V2',1,'Suportes','Transmissão','em_uso','bom','Usado quando precisa, inclusive em trabalhos externos'),
+  ('SmallRig Full Cage for Blackmagic',2,'Acessórios','Transmissão','disponivel','bom','Não está em uso; precisa de estabilidade das câmeras usadas na mão'),
+  ('Câmera Sony A7III + 4 baterias e carregador',1,'Câmeras','Transmissão','em_uso','bom','Transmissão e trabalhos externos'),
+  ('Câmera Sony A6500 + baterias e carregador',1,'Câmeras','Fotografia','em_uso','bom',NULL),
+  ('Câmera Sony A6600',1,'Câmeras','Fotografia','quebrado','ruim','Slot de cartão não está funcionando, levar para conserto'),
+  ('Lente Sony 50mm',1,'Lentes','Transmissão','em_uso','bom',NULL),
+  ('Lente Sony Sigma 14mm',1,'Lentes','Transmissão','em_uso','bom',NULL),
+  ('Lente Sony 55-210mm',1,'Lentes','Fotografia','em_uso','bom',NULL),
+  ('Lente Sony 70-200mm',1,'Lentes','Fotografia','quebrado','ruim','O foco não está funcionando'),
+  ('Lente Sony 85mm',1,'Lentes','Transmissão','em_uso','bom',NULL),
+  ('Lente Sony 16mm',1,'Lentes','Transmissão','em_uso','bom',NULL),
+  ('Lente Canon 24-105mm – Transmissão',1,'Lentes','Transmissão','em_uso','bom',NULL),
+  ('Lente Canon 24-105mm – Estúdio de gravação',3,'Lentes','Estúdio de gravação','em_uso','bom',NULL),
+  ('Lente Canon 50mm',1,'Lentes','Transmissão','em_uso','bom',NULL),
+  ('Lente Canon 85mm',1,'Lentes','Transmissão','em_uso','bom',NULL),
+  ('Lente Canon 70-200mm',1,'Lentes','Fotografia','em_uso','bom','É da transmissão, porém está sendo usada na fotografia'),
+  ('Lente Canon 16-35mm – Transmissão',1,'Lentes','Transmissão','em_uso','bom',NULL),
+  ('Lente Canon 16-35mm – Estúdio de gravação',1,'Lentes','Estúdio de gravação','em_uso','bom',NULL),
+  ('Lente Sigma 150-600mm',1,'Lentes','Transmissão','em_uso','bom',NULL),
+  ('Lente Sigma 14mm',1,'Lentes','Transmissão','em_uso','bom',NULL),
+  ('Lente Panasonic Lumix 45-175mm – Transmissão',5,'Lentes','Transmissão','em_uso','bom',NULL),
+  ('Lente Panasonic Lumix 45-175mm – Estúdio de gravação',1,'Lentes','Estúdio de gravação','em_uso','bom',NULL),
+  ('Focus Commander',2,'Acessórios','Transmissão','em_uso','bom',NULL),
+  ('Zoom Commander',2,'Acessórios','Transmissão','em_uso','bom',NULL),
+  ('PC Live principal',1,'Computadores','Transmissão','em_uso','bom',NULL),
+  ('PC Live backup 1',1,'Computadores','Transmissão','em_uso','bom',NULL),
+  ('PC Live backup 2',1,'Computadores','Transmissão','em_uso','bom',NULL),
+  ('PC Slide 1',1,'Computadores','House','em_uso','bom',NULL),
+  ('PC Slide 2',1,'Computadores','House','em_uso','bom',NULL),
+  ('PC Telão 1',1,'Computadores','House','em_uso','bom',NULL),
+  ('PC Telão 2',1,'Computadores','House','em_uso','bom',NULL),
+  ('PC de gravação do estúdio',1,'Computadores','Estúdio de gravação','em_uso','bom',NULL),
+  ('Splitters HDMI para a TV da Bispa',2,'Acessórios','Estúdio de gravação','em_uso','bom',NULL),
+  ('Mesa de luz MA',1,'Outros','House','em_uso','bom',NULL),
+  ('PC Dell de backup da luz',1,'Computadores','House','disponivel','bom','Não está sendo usado para essa função'),
+  ('Mini mesa MA',1,'Outros','House','disponivel','bom','Não está sendo usada'),
+  ('Placa Lumikit',1,'Outros','House','disponivel','bom','Não está sendo usada'),
+  ('Câmera Osmo Plus',1,'Câmeras','Trabalhos externos','disponivel','bom','Estava em Guarulhos'),
+  ('Câmera Osmo Pocket',1,'Câmeras','Trabalhos externos','em_uso','bom',NULL),
+  ('Câmera Osmo Pocket (na revisão)',1,'Câmeras','Trabalhos externos','precisa_revisao','regular','Está na revisão'),
+  ('Gravador de áudio Zoom H6',1,'Gravadores','Sala técnica','aguardando_liberacao','bom','Precisa testar'),
+  ('Gravador de áudio Zoom H4n',1,'Gravadores','Sala técnica','aguardando_liberacao','bom','Precisa testar'),
+  ('Gravador de áudio Zoom H1 Handy Recorder',1,'Gravadores','Sala técnica','aguardando_liberacao','bom','Precisa testar'),
+  ('SSD da Live',4,'Acessórios','Transmissão','em_uso','bom',NULL),
+  ('Cabo Thunderbolt',2,'Cabos','Transmissão','em_uso','bom',NULL),
+  ('Mesa de áudio analógica Soundcraft',1,'Mesas de som','Transmissão','em_uso','bom',NULL),
+  ('Mesa de áudio Rodecaster Pro',2,'Mesas de som','Estúdio de gravação','em_uso','bom',NULL),
+  ('Microfone Countryman E6 omnidirecional (da Bispa)',2,'Microfones','Estúdio de gravação','em_uso','bom',NULL),
+  ('Bases de microfone da Bispa no estúdio',1,'Suportes','Estúdio de gravação','em_uso','bom',NULL),
+  ('Baterias V-Mount SmallRig 155',2,'Baterias','Transmissão','extraviado','ruim','Perdeu as duas'),
+  ('Carregador V-Mount SmallRig',1,'Carregadores','Transmissão','em_uso','bom','Também carrega as baterias Anton'),
+  ('Bateria V-Mount Anton 150',1,'Baterias','Transmissão','em_uso','bom','Eram 2, perdeu 1'),
+  ('Cabeças robóticas Data Video – câmeras da nave',4,'Suportes','Transmissão','em_uso','bom','Câmeras do pregador na nave'),
+  ('Kit ZEK 1',2,'Acessórios','Transmissão','disponivel','bom','São backup'),
+  ('Kit ZEK 2',2,'Acessórios','Transmissão','disponivel','bom','São backup'),
+  ('Controle das cabeças robóticas Datavideo RMC 180',2,'Acessórios','Transmissão','em_uso','bom',NULL),
+  ('Kit iluminação Softbox Tomate',1,'Iluminação','Transmissão','inativo','ruim','Trocado pela luz GVM por tempo de uso'),
+  ('Kit iluminação GVM (3 luzes, 3 tripés e 3 fontes)',1,'Iluminação','Transmissão','em_uso','bom',NULL),
+  ('Transmissor Hollyland Cosmo C1',2,'Transmissores','Transmissão','em_uso','bom','2 kits'),
+  ('Transmissor Hollyland Mars 400S',2,'Transmissores','Transmissão','em_uso','bom','2 kits'),
+  ('Monitor mini 7 polegadas',1,'Monitores','Estúdio de gravação','disponivel','bom','Não está em uso'),
+  ('Microfone Hollyland',1,'Microfones','Trabalhos externos','em_uso','bom','Reels, stories, chamadas e live'),
+  ('Tripés Manfrotto do estúdio de gravação',3,'Tripés','Estúdio de gravação','em_uso','bom',NULL),
+  ('Tripés E-Image',4,'Tripés','Transmissão','em_uso','bom',NULL),
+  ('Adaptadores de lente Viltrox – Transmissão',1,'Acessórios','Transmissão','em_uso','bom',NULL),
+  ('Adaptadores de lente Viltrox – Estúdio de gravação',4,'Acessórios','Estúdio de gravação','em_uso','bom',NULL),
+  ('Adaptador de lente Viltrox (quebrado)',1,'Acessórios','Transmissão','quebrado','ruim','Quebrou junto com a câmera'),
+  ('Adaptadores de lente MFT',4,'Acessórios','Estúdio de gravação','em_uso','bom',NULL),
+  ('Matte boxes para lente Canon',4,'Acessórios','Estúdio de gravação','em_uso','bom',NULL),
+  ('Kit comunicador Hollyland Solidcom C1 (8 fones)',1,'Intercomunicadores','Transmissão','em_uso','bom',NULL),
+  ('Teleprompter GVM',1,'Acessórios','Transmissão','em_uso','bom','Usado quando precisa'),
+  ('Microfones Shure para podcast (usados no coral)',6,'Microfones','Estúdio de gravação','disponivel','bom',NULL),
+  ('Microfone Rode Shotgun NTG2',1,'Microfones','Transmissão','em_uso','bom','Transmissão e gravações externas'),
+  ('Caixas Yamaha de referência',3,'Outros','Transmissão','em_uso','bom','3 em uso'),
+  ('Caixas Yamaha de referência (queimadas)',3,'Outros','Transmissão','quebrado','ruim','3 queimadas'),
+  ('Focusrite de edição',1,'Acessórios','Sala técnica','disponivel','bom',NULL),
+  ('Trilho de travelling da Maxigrua',1,'Suportes','Transmissão','em_uso','bom','Usado quando precisa, em transmissões e gravações'),
+  ('Kit softbox de 3 peças',1,'Iluminação','Transmissão','inativo','ruim','Trocado pela GVM por tempo de uso'),
+  ('Moovings antigos',3,'Iluminação','Eventos','disponivel','regular','3 inteiros e fora de uso'),
+  ('Mooving antigo desmontado',1,'Iluminação','Eventos','quebrado','ruim','Está desmontado'),
+  ('Moovings novos',12,'Iluminação','Eventos','em_uso','bom',NULL),
+  ('Metabones – Fotografia',1,'Acessórios','Fotografia','em_uso','bom',NULL),
+  ('Metabones – Estúdio de gravação',4,'Acessórios','Estúdio de gravação','em_uso','bom',NULL),
+  ('Stream Deck',3,'Acessórios','Transmissão','disponivel','bom','Funcionando, mas ainda não montados'),
+  ('Drone DJI Mini 2',1,'Outros','Eventos','quebrado','ruim','Está quebrado'),
+  ('Netgear',1,'Roteadores e rede','Sala do VS','disponivel','bom','Está parado no VS'),
+  ('Placas de áudio Bomge',2,'Acessórios','Sala do VS','em_uso','bom',NULL)
+) AS v(nome, qtd, categoria, local, status, conservacao, obs);
